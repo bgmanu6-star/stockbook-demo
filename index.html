@@ -149,6 +149,19 @@ nav.tabs .dot{position:absolute;top:4px;left:calc(50% + 6px);width:8px;height:8p
 .note b{color:var(--ink)}
 .confirm{border:1px solid var(--crit);background:var(--crit-soft);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;font-size:14px}
 
+.timer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--line)}
+.timer .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:8px;flex-wrap:wrap;width:100%}
+.timer .left{display:flex;align-items:baseline;gap:8px;min-width:0}
+.timer .cd{font:800 16px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--low)}
+.timer .lbl{font-size:12.5px;color:var(--muted)}
+.timer.urgent .cd{color:var(--crit)}
+.lock{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lock .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 20px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;text-align:center}
+.lock h3,.contact h3{margin:0;font:800 22px/1.2 var(--f-display);text-wrap:balance}
+.phone{font:800 26px/1.1 var(--f-display);letter-spacing:.02em;font-variant-numeric:tabular-nums;user-select:all}
+.cbtn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;padding:13px 16px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--surface)}
+.cbtn.wa{background:var(--in-solid);border-color:var(--in-solid);color:#fff}
+.cbtn.call{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .toast.warn{background:var(--low);color:#fff}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
@@ -164,6 +177,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
     <button class="iconbtn" id="bell" aria-label="Alerts"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg><span class="dot" id="bellDot" hidden>0</span></button>
   </div>
 </header>
+<div class="timer" id="timerBar"><div class="wrap"><div class="left"><span class="lbl" id="cdLbl">Demo ends in</span><span class="cd" id="cd">—</span></div><button class="btn sm primary" data-contact>Get full version</button></div></div>
+<div id="lockRoot"></div>
 <div class="demo"><div class="wrap"><span class="pill p-idle">DEMO</span><span id="demoTxt">Sample stock and entries for illustration. Prices from the shop's Sika &amp; Dr. Fixit lists.</span></div></div>
 
 <main><div class="wrap" id="view"></div></main>
@@ -454,6 +469,10 @@ function vMore(){
     <div class="note"><b>${t("low")}:</b> each product has its own alert level (min). When an outward entry takes stock to that level or below, the app warns at once and lists it under Alerts.<br><br><b>${t("idle")}:</b> stock that has not sold for the number of days set above, with the money it is holding.</div>
   </section>
   <div id="resetBox"><button class="btn danger" id="btnReset" style="width:100%">${t("reset")}</button></div>
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <h2>Full version</h2>
+    <div class="note" style="display:flex;flex-direction:column;gap:10px;text-align:center"><b>Demo ends 19 Nov 2026, 11:59 PM</b>${contactHtml()}</div>
+  </section>
   <footer>StockBook demo by <b>ZorbaTech</b> · Digital Solutions for Small Business<br>Crafted by Manu Brahma · © ${new Date().getFullYear()} Manu Brahma</footer>`;
 }
 
@@ -660,6 +679,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("button"); if(!b) return;
   const d = b.dataset;
   if(b.id==="bell") return go("alerts");
+  if("contact" in d) return openContact();
   if(d.go){ if(d.filter){ stockFilter=d.filter; stockQ=""; } return go(d.go); }
   if(d.entry) return openEntry(d.entry, d.pid);
   if(d.et){ entry.type = d.et; return drawEntry(); }
@@ -706,12 +726,50 @@ document.addEventListener("change", e => {
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeSheet(); });
 window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if(VIEWS.includes(h) && h!==view) go(h); });
 
+/* ---------- demo period ---------- */
+const DEMO_END = new Date("2026-11-19T23:59:59+05:30").getTime();
+const PHONE = "8610212131", PHONE_SHOW = "+91 86102 12131";
+const WA_MSG = encodeURIComponent("Hello, I tried the StockBook demo. I'd like the full version for my shop.");
+const contactHtml = () => `
+  <div class="phone">${PHONE_SHOW}</div>
+  <a class="cbtn wa" href="https://wa.me/91${PHONE}?text=${WA_MSG}" target="_blank" rel="noopener">WhatsApp</a>
+  <a class="cbtn call" href="tel:+91${PHONE}">Call now</a>
+  <div class="count">Manu Brahma · ZorbaTech – Digital Solutions for Small Business</div>`;
+function openContact(){
+  openSheet(`<div class="contact" style="display:flex;flex-direction:column;gap:14px;text-align:center">
+    <h3>Get the full version</h3>
+    <div class="sub" style="margin-top:0">All shop phones and the PC share one register, staff logins, alerts even when the app is closed, reports and Excel export.</div>
+    ${contactHtml()}
+    <button class="btn" data-close>Back to demo</button></div>`);
+}
+function fmtLeft(ms){
+  const d = Math.floor(ms/DAY), h = Math.floor(ms%DAY/36e5), m = Math.floor(ms%36e5/6e4), sec = Math.floor(ms%6e4/1e3);
+  return d > 0 ? `${d}d ${String(h).padStart(2,"0")}h ${String(m).padStart(2,"0")}m` : `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
+let locked = false;
+function tick(){
+  const left = DEMO_END - Date.now();
+  if(left <= 0){ if(!locked) lockDemo(); return; }
+  document.getElementById("cd").textContent = fmtLeft(left);
+  document.getElementById("cdLbl").textContent = S.settings.lang==="ta" ? "டெமோ முடிவு:" : "Demo ends in";
+  document.getElementById("timerBar").classList.toggle("urgent", left < DAY);
+}
+function lockDemo(){
+  locked = true; closeSheet();
+  document.getElementById("timerBar").hidden = true;
+  document.getElementById("lockRoot").innerHTML = `<div class="lock" role="dialog" aria-modal="true"><div class="card">
+    <h3>The demo period has ended</h3>
+    <div class="sub" style="margin-top:0">Thank you for trying StockBook. Contact us to set up the full version for your shop.</div>
+    ${contactHtml()}</div></div>`;
+}
+
 /* ---------- boot ---------- */
 S = load();
 if(!S || S.v!==1) { S = seed(); persist(); }
 view = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home";
 render();
 dailyNotify();
+tick(); setInterval(tick, 1000);
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
