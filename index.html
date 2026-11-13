@@ -10,7 +10,7 @@
 <title>StockBook Hardware Demo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
 <style>
 /* Layout: one phone-width app column, sticky header, bottom tab bar; stock rows are scanned, not read. */
 :root{
@@ -20,7 +20,7 @@
   --low:#a86a00; --low-soft:#fbefd2; --crit:#bf2430; --crit-soft:#f9dcde; --idle:#5b5fc7; --idle-soft:#e5e5f8;
   --shadow:0 1px 2px rgba(19,32,43,.06),0 4px 14px rgba(19,32,43,.06); --in-solid:#1d7f47; --out-solid:#b8420f;
   --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
-  --f-body:"Inter","Noto Sans Tamil",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0f161d; --surface:#17212b; --sunk:#1e2a35; --ink:#e6edf3; --muted:#93a4b3; --line:#283744;
@@ -199,17 +199,9 @@ const T = {
     cost:"Purchase price ₹",price:"Selling price ₹",min:"Alert when stock falls to",history:"Stock movement",lastSold:"Last sold",never:"Never",days:"days",
     settings:"Settings",shop:"Shop name",lang:"Language",idleDays:"Mark 'not moving' after no sale for",reset:"Reset demo data",notify:"Turn on phone notifications",
     today:"Today",d7:"7 days",d30:"30 days",inStock:"in stock",pick:"Choose product",change:"Change",entries:"entries",saveProduct:"Save product",
-    lowMsg:"Low stock",reorder:"Reorder",copyCsv:"Copy stock list (CSV)",salesVal:"Sales value",devices:"Multiple devices"},
-  ta:{home:"முகப்பு",stock:"இருப்பு",register:"பதிவேடு",alerts:"எச்சரிக்கை",more:"மேலும்",inward:"வரவு",outward:"வெளியேற்றம்",inwardSub:"சரக்கு வந்தது",outwardSub:"விற்பனை / வழங்கல்",
-    products:"பொருட்கள்",value:"இருப்பு மதிப்பு",low:"குறைந்த இருப்பு",idle:"நகராத சரக்கு",out:"இருப்பு இல்லை",ok:"இருப்பில் உள்ளது",all:"அனைத்தும்",search:"பொருள், அளவு அல்லது பிராண்ட் தேடு",
-    recent:"சமீபத்திய பதிவுகள்",seeAll:"அனைத்தும் பார்",needs:"கவனிக்க வேண்டியவை",qty:"எண்ணிக்கை",supplier:"விநியோகஸ்தர்",customer:"வாடிக்கையாளர் / தளம்",bill:"பில் / DC எண்",date:"தேதி",note:"குறிப்பு",
-    save:"பதிவு செய்",cancel:"ரத்து",del:"நீக்கு",edit:"திருத்து",addProduct:"பொருள் சேர்",brand:"பிராண்ட்",cat:"வகை",name:"பொருள் பெயர்",size:"பேக் / அளவு",unit:"அலகு",
-    cost:"கொள்முதல் விலை ₹",price:"விற்பனை விலை ₹",min:"இருப்பு இதற்குக் குறைந்தால் எச்சரி",history:"சரக்கு நகர்வு",lastSold:"கடைசி விற்பனை",never:"இல்லை",days:"நாட்கள்",
-    settings:"அமைப்புகள்",shop:"கடை பெயர்",lang:"மொழி",idleDays:"விற்பனை இல்லாமல் இத்தனை நாள் ஆனால் 'நகராதது'",reset:"டெமோ தரவை மீட்டமை",notify:"போன் அறிவிப்புகளை இயக்கு",
-    today:"இன்று",d7:"7 நாள்",d30:"30 நாள்",inStock:"இருப்பு",pick:"பொருளைத் தேர்ந்தெடு",change:"மாற்று",entries:"பதிவுகள்",saveProduct:"பொருளைச் சேமி",
-    lowMsg:"குறைந்த இருப்பு",reorder:"மீண்டும் ஆர்டர்",copyCsv:"இருப்புப் பட்டியலை நகலெடு (CSV)",salesVal:"விற்பனை மதிப்பு",devices:"பல சாதனங்கள்"}
+    lowMsg:"Low stock",reorder:"Reorder",exportXl:"Download Excel (stock + register)",salesVal:"Sales value",devices:"Multiple devices"},
 };
-const t = k => (T[S.settings.lang]||T.en)[k] || T.en[k] || k;
+const t = k => T.en[k] || k;
 
 /* ---------- storage ---------- */
 const KEY = "zt-stockbook-v1";
@@ -306,6 +298,7 @@ const P = id => S.products.find(p => p.id === id);
 
 /* ---------- icons ---------- */
 const I = {
+  down:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/>',
   stock:'<path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/>',
   register:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
@@ -344,7 +337,7 @@ function txRow(x){
 
 /* ---------- views ---------- */
 const VIEWS = ["home","stock","register","alerts","more"];
-let view = "home", stockFilter = "all", stockBrand = "all", stockQ = "", regFilter = "all", regRange = "d30";
+let view = "home", stockFilter = "all", stockBrand = "all", stockQ = "", regFilter = "all", regRange = "d30", regBrand = "all", regQ = "", lastStockList = [], lastRegList = [];
 
 function renderTabs(){
   document.getElementById("tabs").innerHTML = VIEWS.map(v =>
@@ -352,7 +345,7 @@ function renderTabs(){
   const dot = document.getElementById("bellDot");
   dot.hidden = !D.alertCount; dot.textContent = D.alertCount;
   document.getElementById("shopName").textContent = S.settings.shop;
-  document.getElementById("shopSub").textContent = t("register") === "Register" ? "Stock Register" : "இருப்புப் பதிவேடு";
+  document.getElementById("shopSub").textContent = "Stock Register";
 }
 
 function vHome(){
@@ -390,6 +383,7 @@ function vStock(){
   if(q) list = list.filter(p => (p.name+" "+p.size+" "+p.brand+" "+p.cat).toLowerCase().includes(q));
   const brands = ["all", ...new Set(S.products.map(p=>p.brand))];
   const chip = (k,l) => `<button class="chip" data-sf="${k}" aria-pressed="${stockFilter===k}">${l}<span class="c">${n[k]}</span></button>`;
+  lastStockList = list;
   const shown = list.slice(0,150);
   return `
   <div class="toolbar">
@@ -398,23 +392,35 @@ function vStock(){
     <div class="chips">${brands.map(b=>`<button class="chip" data-sb="${esc(b)}" aria-pressed="${stockBrand===b}">${b==="all"?t("all")+" "+t("brand").toLowerCase():esc(b)}</button>`).join("")}</div>
   </div>
   <div class="sechead"><span class="count" id="stockCount">${list.length} ${t("products").toLowerCase()}${list.length>150?" · showing 150, search to narrow":""}</span>
-    <button class="btn sm primary" data-addprod>${svg("plus",16)} ${t("addProduct")}</button></div>
+    <span style="display:flex;gap:8px"><button class="btn sm" data-xl="stock">${svg("down",16)} Excel</button><button class="btn sm primary" data-addprod>${svg("plus",16)} ${t("addProduct")}</button></span></div>
   <div class="list" id="stockList">${shown.map(p=>productRow(p)).join("") || `<div class="empty">No products match.</div>`}</div>`;
 }
 
 function vRegister(){
   const lim = regRange==="today" ? 0 : regRange==="d7" ? 6 : regRange==="d30" ? 29 : 99999;
   const from = iso(today0() - lim*DAY);
-  const list = S.txns.filter(x => x.date >= from && (regFilter==="all" || x.type===regFilter)).slice().reverse();
+  const rq = regQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const list = S.txns.filter(x => {
+    if(x.date < from || !(regFilter==="all" || x.type===regFilter)) return false;
+    const p = P(x.pid); if(!p) return false;
+    if(regBrand!=="all" && p.brand!==regBrand) return false;
+    if(!rq.length) return true;
+    const h = (p.name+" "+p.size+" "+p.brand+" "+p.cat+" "+(x.party||"")+" "+(x.bill||"")+" "+(x.note||"")).toLowerCase();
+    return rq.every(w => h.includes(w));
+  }).slice().reverse();
+  lastRegList = list;
+  const regBrands = ["all", ...new Set(S.products.map(p=>p.brand))];
   const inQ = list.filter(x=>x.type==="IN").reduce((a,x)=>a+x.qty,0), outQ = list.filter(x=>x.type==="OUT").reduce((a,x)=>a+x.qty,0);
   const outVal = list.filter(x=>x.type==="OUT").reduce((a,x)=>a+x.qty*(P(x.pid)?.price||0),0);
   const c = (attr,k,l,cur) => `<button class="chip" ${attr}="${k}" aria-pressed="${cur===k}">${l}</button>`;
   return `
   <div class="toolbar">
+    <div class="search">${svg("search",18)}<input id="regQ" type="search" placeholder="Search product, supplier, customer or bill no." value="${esc(regQ)}" autocomplete="off"></div>
     <div class="chips">${c("data-rf","all",t("all"),regFilter)}${c("data-rf","IN",t("inward"),regFilter)}${c("data-rf","OUT",t("outward"),regFilter)}</div>
     <div class="chips">${c("data-rr","today",t("today"),regRange)}${c("data-rr","d7",t("d7"),regRange)}${c("data-rr","d30",t("d30"),regRange)}${c("data-rr","allt",t("all"),regRange)}</div>
+    <div class="chips">${regBrands.map(b=>c("data-rb",b,b==="all"?t("all")+" "+t("brand").toLowerCase():esc(b),regBrand)).join("")}</div>
   </div>
-  <div class="facts">
+  <div class="facts" id="regFacts">
     <div class="fact"><div class="l">${t("inward")}</div><div class="v" style="color:var(--in)">+${inQ}</div></div>
     <div class="fact"><div class="l">${t("outward")}</div><div class="v" style="color:var(--out)">−${outQ}</div></div>
     <div class="fact"><div class="l">${t("salesVal")}</div><div class="v">${rupeeShort(outVal)}</div></div>
@@ -423,8 +429,9 @@ function vRegister(){
     <button class="big in" data-entry="IN">${svg("in",22)}<span>${t("inward")}</span></button>
     <button class="big out" data-entry="OUT">${svg("out",22)}<span>${t("outward")}</span></button>
   </div>
-  <div class="count">${list.length} ${t("entries")}${list.length>200?" · showing latest 200":""}</div>
-  <div class="list">${list.slice(0,200).map(txRow).join("") || `<div class="empty">No entries in this period.</div>`}</div>`;
+  <div class="sechead"><span class="count" id="regCount">${list.length} ${t("entries")}${list.length>200?" · showing latest 200":""}</span>
+    <button class="btn sm" data-xl="register">${svg("down",16)} Excel</button></div>
+  <div class="list" id="regList">${list.slice(0,200).map(txRow).join("") || `<div class="empty">No entries in this period.</div>`}</div>`;
 }
 
 function vAlerts(){
@@ -452,12 +459,10 @@ function vMore(){
     <h2>${t("settings")}</h2>
     <div class="list" style="padding:14px;display:flex;flex-direction:column;gap:14px">
       <div class="field"><label for="setShop">${t("shop")}</label><input id="setShop" value="${esc(s.shop)}"></div>
-      <div class="field"><label>${t("lang")}</label>
-        <div class="seg"><button data-lang="en" class="${s.lang==="en"?"":""}" aria-pressed="${s.lang==="en"}" style="${s.lang==="en"?"background:var(--surface);color:var(--ink)":""}">English</button><button data-lang="ta" aria-pressed="${s.lang==="ta"}" style="${s.lang==="ta"?"background:var(--surface);color:var(--ink)":""}">தமிழ்</button></div></div>
       <div class="field"><label for="setIdle">${t("idleDays")}</label>
         <select id="setIdle">${[15,30,45,60,90].map(d=>`<option value="${d}" ${+s.idleDays===d?"selected":""}>${d} ${t("days")}</option>`).join("")}</select></div>
       <button class="btn" id="btnNotify">${t("notify")}</button>
-      <button class="btn" id="btnCsv">${t("copyCsv")}</button>
+      <button class="btn" data-xl="all">${svg("down",16)} ${t("exportXl")}</button>
     </div>
   </section>
   <section style="display:flex;flex-direction:column;gap:12px">
@@ -473,7 +478,7 @@ function vMore(){
     <h2>Full version</h2>
     <div class="note" style="display:flex;flex-direction:column;gap:10px;text-align:center"><b>Demo ends 19 Nov 2026, 11:59 PM</b>${contactHtml()}</div>
   </section>
-  <footer>StockBook demo by <b>ZorbaTech</b> · Digital Solutions for Small Business<br>Crafted by Manu Brahma · © ${new Date().getFullYear()} Manu Brahma</footer>`;
+  <footer>StockBook demo by <b>ZorbaTech</b> · Digital Solutions for Small Business<br>© ${new Date().getFullYear()} ZorbaTech</footer>`;
 }
 
 function render(){
@@ -481,9 +486,7 @@ function render(){
   renderTabs();
   const el = document.getElementById("view");
   el.innerHTML = ({home:vHome,stock:vStock,register:vRegister,alerts:vAlerts,more:vMore})[view]();
-  document.getElementById("demoTxt").textContent = S.settings.lang==="ta"
-    ? "மாதிரி இருப்பு மற்றும் பதிவுகள். விலைகள் கடையின் Sika & Dr. Fixit பட்டியலிலிருந்து."
-    : "Sample stock and entries for illustration. Prices from the shop's Sika & Dr. Fixit lists.";
+  document.getElementById("demoTxt").textContent = "Sample stock and entries for illustration. Prices from the shop's Sika & Dr. Fixit lists.";
 }
 function go(v){ if(!VIEWS.includes(v)) v="home"; view=v; if(location.hash.slice(1)!==v){ try{ history.replaceState(null,"","#"+v); }catch(e){ location.hash=v; } } render(); window.scrollTo(0,0); }
 
@@ -507,7 +510,7 @@ function closeSheet(){ document.getElementById("sheetRoot").innerHTML = ""; }
 /* entry form */
 let entry = null;
 function openEntry(type, pid){
-  entry = { type, pid: pid||null, q:"" };
+  entry = { type, pid: pid||null, q:"", pb:"all", pc:"all", ps:"all" };
   drawEntry();
 }
 function drawEntry(){
@@ -515,7 +518,7 @@ function drawEntry(){
   const e = entry, p = e.pid ? P(e.pid) : null, isIn = e.type==="IN";
   const picker = p
     ? `<div class="picked"><div class="main"><div class="t" style="font-weight:600">${esc(p.name)}${p.size?" · "+esc(p.size):""}</div><div class="count">${esc(p.brand)} · ${t("inStock")}: <b class="num">${p._s}</b> · min ${p.min}</div></div><button class="btn sm" id="chg">${t("change")}</button></div>`
-    : `<div class="search">${svg("search",18)}<input id="pq" type="search" placeholder="${t("search")}" value="${esc(e.q)}" autocomplete="off" autofocus></div><div class="picklist" id="plist">${pickList(e.q)}</div>`;
+    : pickerHtml(e);
   openSheet(`
     <h3>${isIn ? t("inward") : t("outward")}</h3>
     <div class="seg"><button class="in" data-et="IN" aria-pressed="${isIn}">${t("inward")}</button><button class="out" data-et="OUT" aria-pressed="${!isIn}">${t("outward")}</button></div>
@@ -532,10 +535,24 @@ function drawEntry(){
       <div class="btns"><button type="button" class="btn" data-close>${t("cancel")}</button><button type="submit" class="btn primary">${t("save")}</button></div>
     </form>`);
 }
+function pickMatches(q){
+  const e = entry, words = (q||"").trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return S.products.filter(p => (e.pb==="all"||p.brand===e.pb) && (e.pc==="all"||p.cat===e.pc) && (e.ps==="all"||p._status===e.ps)
+    && (() => { const h=(p.name+" "+p.size+" "+p.brand+" "+p.cat).toLowerCase(); return words.every(w=>h.includes(w)); })());
+}
+function pickerHtml(e){
+  const brands = ["all", ...new Set(S.products.map(p=>p.brand))];
+  const cats = ["all", ...new Set(S.products.filter(p=>e.pb==="all"||p.brand===e.pb).map(p=>p.cat))];
+  const ch = (a,k,l,cur) => `<button type="button" class="chip" ${a}="${esc(k)}" aria-pressed="${cur===k}">${l}</button>`;
+  return `<div class="search">${svg("search",18)}<input id="pq" type="search" placeholder="${t("search")}" value="${esc(e.q)}" autocomplete="off" autofocus></div>
+    <div class="chips" style="margin-top:8px">${[["all",t("all")],["ok",t("ok")],["low",t("low")],["out",t("out")]].map(([k,l])=>ch("data-ps",k,l,e.ps)).join("")}</div>
+    <div class="chips" style="margin-top:8px">${brands.map(b=>ch("data-pb",b,b==="all"?t("all")+" "+t("brand").toLowerCase():esc(b),e.pb)).join("")}</div>
+    <select id="pcat" aria-label="${t("cat")}" style="margin-top:8px;width:100%">${cats.map(c=>`<option value="${esc(c)}" ${e.pc===c?"selected":""}>${c==="all"?t("all")+" "+t("cat").toLowerCase():esc(c)}</option>`).join("")}</select>
+    <div class="count" id="pcount" style="margin:8px 0 4px">${Math.min(pickMatches(e.q).length,40)} of ${pickMatches(e.q).length} ${t("products").toLowerCase()}</div>
+    <div class="picklist" id="plist">${pickList(e.q)}</div>`;
+}
 function pickList(q){
-  q = (q||"").trim().toLowerCase();
-  const words = q.split(/\s+/).filter(Boolean);
-  const list = S.products.filter(p => { const h=(p.name+" "+p.size+" "+p.brand+" "+p.cat).toLowerCase(); return words.every(w=>h.includes(w)); }).slice(0,40);
+  const list = pickMatches(q).slice(0,40);
   return list.map(p => `<button class="row" type="button" data-pick="${p.id}"><div class="main"><div class="t">${esc(p.name)}${p.size?" · "+esc(p.size):""}</div><div class="s"><span class="brand">${esc(p.brand)}</span>${statusPill(p)}</div></div><div class="r"><div class="qty">${p._s}</div></div></button>`).join("") || `<div class="empty">No product found. Add it from the Stock tab.</div>`;
 }
 function saveEntry(){
@@ -674,6 +691,171 @@ function dailyNotify(){
   }catch(e){}
 }
 
+/* ---------- Excel export (built in, no library) ---------- */
+const XL = (() => {
+  const enc = new TextEncoder();
+  const X = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"");
+  const crcT = (() => { const t = new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+  const crc = b => { let c = 0xFFFFFFFF; for(let i=0;i<b.length;i++) c = crcT[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; };
+  function zip(files){
+    const parts = [], cen = []; let off = 0;
+    const d = new Date(), dt = ((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(), tm = (d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+    for(const f of files){
+      const nm = enc.encode(f.name), c = crc(f.data), n = f.data.length;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(10,tm,true); lh.setUint16(12,dt,true);
+      lh.setUint32(14,c,true); lh.setUint32(18,n,true); lh.setUint32(22,n,true); lh.setUint16(26,nm.length,true);
+      parts.push(new Uint8Array(lh.buffer), nm, f.data);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true); ch.setUint16(12,tm,true); ch.setUint16(14,dt,true);
+      ch.setUint32(16,c,true); ch.setUint32(20,n,true); ch.setUint32(24,n,true); ch.setUint16(28,nm.length,true); ch.setUint32(42,off,true);
+      cen.push(new Uint8Array(ch.buffer), nm);
+      off += 30 + nm.length + n;
+    }
+    const cs = cen.reduce((a,x)=>a+x.length,0), end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true); end.setUint32(12,cs,true); end.setUint32(16,off,true);
+    return new Blob([...parts, ...cen, new Uint8Array(end.buffer)], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  }
+  const colName = i => { let s = ""; for(i++; i>0; i = Math.floor((i-1)/26)) s = String.fromCharCode(65+(i-1)%26) + s; return s; };
+  const serial = iso => { const [y,m,d] = String(iso).split("-").map(Number); return (Date.UTC(y,m-1,d) - Date.UTC(1899,11,30)) / 864e5; };
+
+  /* styles */
+  const font = (o={}) => `<font>${o.b?"<b/>":""}${o.i?"<i/>":""}<sz val="${o.sz||11}"/><color rgb="${o.c||"FF16153A"}"/><name val="Calibri"/><family val="2"/></font>`;
+  const fonts = [font(), font({b:1,c:"FFFFFFFF"}), font({b:1,sz:16,c:"FF0D0C2B"}), font({i:1,sz:10,c:"FF55537A"}), font({b:1}),
+    font({b:1,c:"FF9B1C1C"}), font({b:1,c:"FF8A5A00"}), font({b:1,c:"FF1F6B3A"}), font({b:1,c:"FF4A4880"})];
+  const solid = c => `<fill><patternFill patternType="solid"><fgColor rgb="${c}"/><bgColor indexed="64"/></patternFill></fill>`;
+  const fills = ['<fill><patternFill patternType="none"/></fill>','<fill><patternFill patternType="gray125"/></fill>', solid("FF0D0C2B"), solid("FFF4F6FB"), solid("FFFDE8E8"), solid("FFFFF3D6"), solid("FFE6F6EC"), solid("FFE9E8F7"), solid("FFE3E6F0")];
+  const bd = (s,c) => `<${s} style="thin"><color rgb="${c}"/></${s}>`;
+  const line = "FFD5D9E8";
+  const borders = ['<border><left/><right/><top/><bottom/><diagonal/></border>',
+    `<border>${bd("left",line)}${bd("right",line)}${bd("top",line)}${bd("bottom",line)}<diagonal/></border>`,
+    `<border>${bd("left",line)}${bd("right",line)}<top style="medium"><color rgb="FF0D0C2B"/></top>${bd("bottom",line)}<diagonal/></border>`];
+  const numFmts = {money:'"₹"#,##0.00', int:'#,##0', date:'dd\\-mmm\\-yyyy', rupee:'"₹"#,##0'};
+  const fmtId = {money:164, int:165, date:166, rupee:167};
+  const xfs = [], xfKey = new Map();
+  const xf = o => {
+    const k = JSON.stringify(o); if(xfKey.has(k)) return xfKey.get(k);
+    const a = `<alignment horizontal="${o.h||"left"}" vertical="center"${o.wrap?' wrapText="1"':""}${o.ind?` indent="${o.ind}"`:""}/>`;
+    xfs.push(`<xf numFmtId="${o.n?fmtId[o.n]:0}" fontId="${o.f||0}" fillId="${o.fill||0}" borderId="${o.bd||0}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">${a}</xf>`);
+    xfKey.set(k, xfs.length-1); return xfs.length-1;
+  };
+  xf({}); // 0 default
+  const ST = {
+    title: () => xf({f:2}), sub: () => xf({f:3}),
+    head: () => xf({f:1, fill:2, bd:1, h:"center", wrap:1}),
+    text: z => xf({fill:z?3:0, bd:1, ind:1}), center: z => xf({fill:z?3:0, bd:1, h:"center"}),
+    int: z => xf({fill:z?3:0, bd:1, h:"right", n:"int"}), money: z => xf({fill:z?3:0, bd:1, h:"right", n:"money"}),
+    date: z => xf({fill:z?3:0, bd:1, h:"center", n:"date"}),
+    out: () => xf({f:5, fill:4, bd:1, h:"center"}), low: () => xf({f:6, fill:5, bd:1, h:"center"}),
+    idle: () => xf({f:8, fill:7, bd:1, h:"center"}), ok: () => xf({f:7, fill:6, bd:1, h:"center"}),
+    tin: () => xf({f:7, fill:6, bd:1, h:"center"}), tout: () => xf({f:5, fill:4, bd:1, h:"center"}),
+    totText: () => xf({f:4, fill:8, bd:2, ind:1}), totInt: () => xf({f:4, fill:8, bd:2, h:"right", n:"int"}), totMoney: () => xf({f:4, fill:8, bd:2, h:"right", n:"money"}), totBlank: () => xf({f:4, fill:8, bd:2})
+  };
+
+  function sheetXml(sh, idx){
+    const C = sh.cols, n = C.length, last = colName(n-1), HR = 4, rows = [];
+    const cell = (r, c, v, s) => {
+      const ref = colName(c) + r;
+      if(v === null || v === undefined || v === "") return `<c r="${ref}" s="${s}"/>`;
+      if(typeof v === "number") return `<c r="${ref}" s="${s}"><v>${v}</v></c>`;
+      return `<c r="${ref}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${X(v)}</t></is></c>`;
+    };
+    rows.push(`<row r="1" ht="30" customHeight="1">${cell(1,0,sh.title,ST.title())}</row>`);
+    rows.push(`<row r="2" ht="18" customHeight="1">${cell(2,0,sh.sub,ST.sub())}</row>`);
+    rows.push(`<row r="3" ht="8" customHeight="1"/>`);
+    rows.push(`<row r="${HR}" ht="32" customHeight="1">${C.map((c,i)=>cell(HR,i,c.h,ST.head())).join("")}</row>`);
+    sh.rows.forEach((row, ri) => {
+      const r = HR + 1 + ri, z = ri % 2;
+      rows.push(`<row r="${r}" ht="22" customHeight="1">${C.map((c,i)=>{
+        let v = row[i], k = c.k;
+        if(c.k === "status"){ k = ({out:"out", low:"low", idle:"idle", ok:"ok"})[row._st] || "ok"; return cell(r,i,v,ST[k]()); }
+        if(c.k === "type"){ return cell(r,i,v,ST[v==="Inward"?"tin":"tout"]()); }
+        if(c.k === "date"){ return v ? cell(r,i,serial(v),ST.date(z)) : cell(r,i,"",ST.center(z)); }
+        return cell(r,i,v,ST[k](z));
+      }).join("")}</row>`);
+    });
+    let endRow = HR + sh.rows.length;
+    if(sh.total){
+      const r = endRow + 1; endRow = r;
+      rows.push(`<row r="${r}" ht="26" customHeight="1">${C.map((c,i)=>{ const v = sh.total[i]; const k = typeof v === "number" ? (c.k==="money"?"totMoney":"totInt") : (v ? "totText" : "totBlank"); return cell(r,i,v,ST[k]()); }).join("")}</row>`);
+    }
+    const dataEnd = HR + Math.max(sh.rows.length, 1);
+    const cols = C.map((c,i)=>`<col min="${i+1}" max="${i+1}" width="${c.w}" customWidth="1"/>`).join("");
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"${idx===0?' tabSelected="1"':""}><pane ySplit="${HR}" topLeftCell="A${HR+1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A${HR+1}" sqref="A${HR+1}"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="20"/><cols>${cols}</cols><sheetData>${rows.join("")}</sheetData><autoFilter ref="A${HR}:${last}${dataEnd}"/><mergeCells count="2"><mergeCell ref="A1:${last}1"/><mergeCell ref="A2:${last}2"/></mergeCells><pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+  }
+  function build(sheets){
+    const safe = (s,i) => (String(s).replace(/[\\\/\?\*\[\]:]/g,"").slice(0,31) || "Sheet"+(i+1));
+    const sx = sheets.map((s,i)=>sheetXml(s,i));
+    const names = sheets.map((s,i)=>safe(s.name,i));
+    const files = [
+      ["[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>`],
+      ["_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+      ["xl/workbook.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${names.map((n,i)=>`<sheet name="${X(n)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join("")}</sheets><definedNames>${sheets.map((s,i)=>{ const q = "'"+names[i].replace(/'/g,"''")+"'"; return `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">${X(q)}!$A$4:$${colName(s.cols.length-1)}$${4+Math.max(s.rows.length,1)}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${i}">${X(q)}!$4:$4</definedName>`; }).join("")}</definedNames></workbook>`],
+      ["xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+      ["xl/styles.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="4">${Object.keys(numFmts).map(k=>`<numFmt numFmtId="${fmtId[k]}" formatCode="${X(numFmts[k])}"/>`).join("")}</numFmts><fonts count="${fonts.length}">${fonts.join("")}</fonts><fills count="${fills.length}">${fills.join("")}</fills><borders count="${borders.length}">${borders.join("")}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join("")}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`]
+    ].concat(sx.map((x,i)=>[`xl/worksheets/sheet${i+1}.xml`, x]));
+    return zip(files.map(([name,s])=>({name, data: enc.encode(s)})));
+  }
+  /* width helper: fit the longest value, within limits */
+  const fit = (head, vals, min, max) => Math.max(min, Math.min(max, Math.ceil(Math.max(String(head).length + 3, ...vals.map(v=>String(v==null?"":v).length)) * 1.12 + 3)));
+  return { build, fit };
+})();
+
+
+function stockSheet(list, desc){
+  const dnow = new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+  const st = {out:"Out of stock", low:"Low stock", ok:"In stock"};
+  const rows = list.map((p,i) => { const r = [i+1,p.brand,p.cat,p.name,p.size||"",p.unit,p._s,p.min,p.cost,p.price,Math.round(p._s*p.cost*100)/100,p._lastOut||"",p._idle ? "Not moving" : st[p._status]]; r._st = p._idle && p._status==="ok" ? "idle" : p._status; return r; });
+  const col = (h,k,min,max,i) => ({h,k,w:XL.fit(h,rows.map(r=>r[i]),min,max)});
+  const cols = [{h:"#",k:"center",w:6}, col("Brand","text",12,24,1), col("Category","text",14,30,2), col("Product","text",24,60,3), col("Pack / size","text",12,22,4), {h:"Unit",k:"center",w:8},
+    {h:"Stock",k:"int",w:10}, {h:"Alert level",k:"int",w:11}, {h:"Purchase price",k:"money",w:15}, {h:"Selling price",k:"money",w:15}, {h:"Stock value",k:"money",w:17}, {h:"Last sold",k:"date",w:14}, {h:"Status",k:"status",w:16}];
+  const total = ["","","",`Total · ${rows.length} products`,"","",rows.reduce((a,r)=>a+r[6],0),"","","",rows.reduce((a,r)=>a+r[10],0),"",""];
+  return { name:"Stock", title:S.settings.shop, sub:`Stock list · ${dnow}${desc?" · "+desc:""}`, cols, rows, total };
+}
+function registerSheet(list, desc){
+  const dnow = new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+  const rows = list.map(x => { const p = P(x.pid); const rate = x.type==="OUT" ? p.price : p.cost;
+    return [x.date, x.type==="IN"?"Inward":"Outward", p.name+(p.size?" · "+p.size:""), p.brand, p.cat, x.qty, p.unit, x.party||"", x.bill||"", Math.round(x.qty*rate*100)/100]; });
+  const inQ = list.filter(x=>x.type==="IN").reduce((a,x)=>a+x.qty,0), outQ = list.filter(x=>x.type==="OUT").reduce((a,x)=>a+x.qty,0);
+  const col = (h,k,min,max,i) => ({h,k,w:XL.fit(h,rows.map(r=>r[i]),min,max)});
+  const cols = [{h:"Date",k:"date",w:14}, {h:"Type",k:"type",w:12}, col("Product","text",24,66,2), col("Brand","text",12,24,3), col("Category","text",14,30,4), {h:"Qty",k:"int",w:9}, {h:"Unit",k:"center",w:8},
+    col("Supplier / Customer","text",22,36,7), col("Bill / DC no.","text",14,24,8), {h:"Value",k:"money",w:17}];
+  return { name:"Register", title:S.settings.shop, sub:`Stock register · ${dnow} · Inward ${inQ} · Outward ${outQ}${desc?" · "+desc:""}`, cols, rows };
+}
+function exportExcel(kind){
+  derive();
+  try{
+    const sheets = [];
+    if(kind==="stock"){
+      const bits = [stockFilter!=="all" && ({low:"Low stock",idle:"Not moving",ok:"In stock"})[stockFilter], stockBrand!=="all" && stockBrand, stockQ.trim() && `"${stockQ.trim()}"`].filter(Boolean);
+      sheets.push(stockSheet(lastStockList, bits.join(", ")));
+    } else if(kind==="register"){
+      const rng = {today:"Today",d7:"Last 7 days",d30:"Last 30 days",allt:"All dates"}[regRange];
+      const bits = [rng, regFilter!=="all" && (regFilter==="IN"?"Inward only":"Outward only"), regBrand!=="all" && regBrand, regQ.trim() && `"${regQ.trim()}"`].filter(Boolean);
+      sheets.push(registerSheet(lastRegList, bits.join(", ")));
+    } else {
+      sheets.push(stockSheet(S.products.slice(), ""), registerSheet(S.txns.slice().reverse(), "All entries"));
+    }
+    const blob = XL.build(sheets);
+    const day = iso(today0()), nm = (S.settings.shop||"StockBook").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-") || "StockBook";
+    const fname = `${nm}-${kind==="stock"?"Stock":kind==="register"?"Register":"Stock-Register"}-${day}.xlsx`;
+    saveFile(blob, fname);
+  }catch(err){ console.error(err); toast("Could not create the Excel file on this device.", true); }
+}
+async function saveFile(blob, fname){
+  try{
+    const f = new File([blob], fname, {type:blob.type});
+    if(matchMedia("(pointer:coarse)").matches && navigator.canShare && navigator.canShare({files:[f]})){
+      try{ await navigator.share({files:[f], title:fname}); return toast("Excel file ready"); }catch(e){ if(e && e.name==="AbortError") return; }
+    }
+  }catch(e){}
+  const url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  toast("Excel file downloaded: " + fname);
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
   const b = e.target.closest("button"); if(!b) return;
@@ -684,6 +866,8 @@ document.addEventListener("click", e => {
   if(d.entry) return openEntry(d.entry, d.pid);
   if(d.et){ entry.type = d.et; return drawEntry(); }
   if(d.pick){ entry.pid = d.pick; return drawEntry(); }
+  if(d.ps){ entry.ps = d.ps; return drawEntry(); }
+  if(d.pb){ entry.pb = d.pb; entry.pc = "all"; return drawEntry(); }
   if(b.id==="chg"){ entry.pid = null; return drawEntry(); }
   if(d.prod) return openProduct(d.prod);
   if(d.tx) return openTx(d.tx);
@@ -698,17 +882,14 @@ document.addEventListener("click", e => {
   if(d.sb){ stockBrand = d.sb; return render(); }
   if(d.rf){ regFilter = d.rf; return render(); }
   if(d.rr){ regRange = d.rr; return render(); }
-  if(d.lang){ S.settings.lang = d.lang; persist(); return render(); }
+  if(d.rb){ regBrand = d.rb; return render(); }
+  if(d.xl) return exportExcel(d.xl);
   if(b.id==="btnNotify") return enableNotify();
-  if(b.id==="btnCsv"){
-    const rows = [["Brand","Category","Product","Size","Unit","Stock","Min","Purchase","Selling","Stock value","Last sold","Status"]]
-      .concat(S.products.map(p=>[p.brand,p.cat,p.name,p.size,p.unit,p._s,p.min,p.cost,p.price,(p._s*p.cost).toFixed(2),p._lastOut||"",p._status+(p._idle?" / not moving":"")]));
-    const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
-    navigator.clipboard.writeText(csv).then(()=>toast("Stock list copied. Paste it into Excel or Sheets.")).catch(()=>toast("Copy is blocked here. Try in the installed app."));
-    return;
-  }
   if(b.id==="btnReset"){ document.getElementById("resetBox").innerHTML = `<div class="confirm">Replace all data with fresh demo data?<div class="btns"><button class="btn" data-go="more">${t("cancel")}</button><button class="btn danger solid" id="doReset">${t("reset")}</button></div></div>`; return; }
-  if(b.id==="doReset"){ const l = S.settings.lang; S = seed(); S.settings.lang = l; persist(); go("home"); return toast("Demo data reset"); }
+  if(b.id==="doReset"){ S = seed(); persist(); go("home"); return toast("Demo data reset"); }
+});
+document.addEventListener("change", e => {
+  if(e.target.id==="pcat"){ entry.pc = e.target.value; const m = pickMatches(entry.q).length; document.getElementById("plist").innerHTML = pickList(entry.q); document.getElementById("pcount").textContent = `${Math.min(m,40)} of ${m} ${t("products").toLowerCase()}`; }
 });
 document.addEventListener("submit", e => {
   e.preventDefault();
@@ -716,8 +897,9 @@ document.addEventListener("submit", e => {
   if(e.target.id==="pf") saveProduct(e.target);
 });
 document.addEventListener("input", e => {
+  if(e.target.id==="regQ"){ regQ = e.target.value; const tmp = document.createElement("div"); tmp.innerHTML = vRegister(); ["regList","regCount","regFacts"].forEach(id => document.getElementById(id).innerHTML = tmp.querySelector("#"+id).innerHTML); }
   if(e.target.id==="stockQ"){ stockQ = e.target.value; const tmp = document.createElement("div"); tmp.innerHTML = vStock(); ["stockList","stockCount"].forEach(id => document.getElementById(id).innerHTML = tmp.querySelector("#"+id).innerHTML); }
-  if(e.target.id==="pq"){ entry.q = e.target.value; document.getElementById("plist").innerHTML = pickList(entry.q); }
+  if(e.target.id==="pq"){ entry.q = e.target.value; document.getElementById("plist").innerHTML = pickList(entry.q); const m = pickMatches(entry.q).length; document.getElementById("pcount").textContent = `${Math.min(m,40)} of ${m} ${t("products").toLowerCase()}`; }
 });
 document.addEventListener("change", e => {
   if(e.target.id==="setShop"){ S.settings.shop = e.target.value.trim() || "My Hardware Store"; persist(); renderTabs(); toast("Shop name saved"); }
@@ -734,7 +916,7 @@ const contactHtml = () => `
   <div class="phone">${PHONE_SHOW}</div>
   <a class="cbtn wa" href="https://wa.me/91${PHONE}?text=${WA_MSG}" target="_blank" rel="noopener">WhatsApp</a>
   <a class="cbtn call" href="tel:+91${PHONE}">Call now</a>
-  <div class="count">Manu Brahma · ZorbaTech – Digital Solutions for Small Business</div>`;
+  <div class="count">Manu B · ZorbaTech – Digital Solutions for Small Business</div>`;
 function openContact(){
   openSheet(`<div class="contact" style="display:flex;flex-direction:column;gap:14px;text-align:center">
     <h3>Get the full version</h3>
@@ -751,7 +933,6 @@ function tick(){
   const left = DEMO_END - Date.now();
   if(left <= 0){ if(!locked) lockDemo(); return; }
   document.getElementById("cd").textContent = fmtLeft(left);
-  document.getElementById("cdLbl").textContent = S.settings.lang==="ta" ? "டெமோ முடிவு:" : "Demo ends in";
   document.getElementById("timerBar").classList.toggle("urgent", left < DAY);
 }
 function lockDemo(){

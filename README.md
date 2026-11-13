@@ -10,7 +10,7 @@ Demo stock register PWA for a hardware shop, built by **ZorbaTech** – Digital 
 - Not-moving stock alert (no sale in 15–90 days, set in More)
 - Add, edit and delete products; full movement history per product
 - 258 Sika and Dr. Fixit products preloaded from the shop's price lists
-- Tamil / English, light / dark mode, installable on phone and PC
+- English, light / dark mode, installable on phone and PC
 
 Demo data is sample stock for illustration and is stored on each device only.
 
