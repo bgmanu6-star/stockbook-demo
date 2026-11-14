@@ -179,7 +179,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 4px}
 </header>
 <div class="timer" id="timerBar"><div class="wrap"><div class="left"><span class="lbl" id="cdLbl">Demo ends in</span><span class="cd" id="cd">—</span></div><button class="btn sm primary" data-contact>Get full version</button></div></div>
 <div id="lockRoot"></div>
-<div class="demo"><div class="wrap"><span class="pill p-idle">DEMO</span><span id="demoTxt">Sample stock and entries for illustration. All names, prices and entries are made-up samples.</span></div></div>
+<div class="demo"><div class="wrap"><span class="pill p-idle">DEMO</span><span id="demoTxt">Demo with placeholder items and entries. Your own products, prices and shop name go here.</span></div></div>
 
 <main><div class="wrap" id="view"></div></main>
 
@@ -259,7 +259,7 @@ function seed(){
     if(fast && stock > p.min){ const q = stock - Math.floor(r()*(p.min+1)); if(q>0){ stock -= q; add(p.id,"OUT",q,day(-1 - Math.floor(r()*3)),customers[3+Math.floor(r()*4)],"B-"+(2400+seq)); } }
   });
   txns.sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-  return { v:1, sample:2, settings:{shop:"Sample Hardware Store", lang:"en", idleDays:30}, products, txns, seq };
+  return { v:1, sample:3, settings:{shop:"Your Shop Name", lang:"en", idleDays:30}, products, txns, seq };
 }
 
 /* ---------- derived ---------- */
@@ -480,7 +480,7 @@ function render(){
   renderTabs();
   const el = document.getElementById("view");
   el.innerHTML = ({home:vHome,stock:vStock,register:vRegister,alerts:vAlerts,more:vMore})[view]();
-  document.getElementById("demoTxt").textContent = "Sample stock and entries for illustration. All names, prices and entries are made-up samples.";
+  document.getElementById("demoTxt").textContent = "Demo with placeholder items and entries. Your own products, prices and shop name go here.";
 }
 function go(v){ if(!VIEWS.includes(v)) v="home"; view=v; if(location.hash.slice(1)!==v){ try{ history.replaceState(null,"","#"+v); }catch(e){ location.hash=v; } } render(); window.scrollTo(0,0); }
 
@@ -940,7 +940,7 @@ function lockDemo(){
 
 /* ---------- boot ---------- */
 S = load();
-if(!S || S.v!==1 || S.sample!==2) { S = seed(); persist(); }
+if(!S || S.v!==1 || S.sample!==3) { S = seed(); persist(); }
 view = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home";
 render();
 dailyNotify();
